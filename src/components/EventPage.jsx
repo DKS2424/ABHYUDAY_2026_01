@@ -9,10 +9,16 @@ export default function EventPage() {
   const canvasRef = useRef(null);
   const [visible, setVisible] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     window.scrollTo(0, 0);
     const t = setTimeout(() => setVisible(true), 80);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      // Reset scroll when leaving event page
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
   }, []);
 
   // Floating dust particles
@@ -86,7 +92,7 @@ export default function EventPage() {
 
   return (
     <div
-      className="bg-black min-h-screen overflow-x-hidden relative"
+     className="bg-black min-h-screen relative"
       style={{ fontFamily: "'Share Tech Mono', monospace" }}
     >
       {/* Google font */}

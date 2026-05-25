@@ -1,48 +1,60 @@
 import { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 
-export function ProfileCard({ id, name, image }) {
+export function ProfileCard({ id, name, image, isScrolling } ) {
   const navigate = useNavigate();
   const cardRef = useRef(null);
-  const timerRef = useRef(null);
-  const rafRef = useRef(null);
+
 
   useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
+  const card = cardRef.current;
+  if (!card) return;
+  if (isScrolling) {
+    card.classList.add("scrolling");
+  } else {
+    card.classList.remove("scrolling");
+  }
+}, [isScrolling]);
+  // const timerRef = useRef(null);
+  // const rafRef = useRef(null);
 
-    const scrollParent = card.closest(".overflow-x-auto") || window;
+  // useEffect(() => {
+  //   const card = cardRef.current;
+  //   if (!card) return;
 
-    function flicker() {
-      const opacity = (0.5 + Math.random() * 0.5).toFixed(2);
-      card.style.setProperty("--flicker-opacity", opacity);
-      rafRef.current = requestAnimationFrame(() =>
-        setTimeout(flicker, 40 + Math.random() * 80)
-      );
-    }
+  //   const scrollParent = card.closest(".overflow-x-auto") || window;
 
-    function stop() {
-      card.classList.remove("scrolling");
-      cancelAnimationFrame(rafRef.current);
-      card.style.setProperty("--flicker-opacity", "0");
-    }
+  //   function flicker() {
+  //     const opacity = (0.5 + Math.random() * 0.5).toFixed(2);
+  //     card.style.setProperty("--flicker-opacity", opacity);
+  //     rafRef.current = requestAnimationFrame(() =>
+  //       setTimeout(flicker, 40 + Math.random() * 80)
+  //     );
+  //   }
 
-    function onScroll() {
-      if (!card.classList.contains("scrolling")) {
-        card.classList.add("scrolling");
-        flicker();
-      }
-      clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(stop, 300);
-    }
+  //   function stop() {
+  //     card.classList.remove("scrolling");
+  //     cancelAnimationFrame(rafRef.current);
+  //     card.style.setProperty("--flicker-opacity", "0");
+  //   }
 
-    scrollParent.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      scrollParent.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(rafRef.current);
-      clearTimeout(timerRef.current);
-    };
-  }, []);
+  //   function onScroll() {
+  //     if (!card.classList.contains("scrolling")) {
+  //       card.classList.add("scrolling");
+  //       flicker();
+  //     }
+  //     clearTimeout(timerRef.current);
+  //     timerRef.current = setTimeout(stop, 300);
+  //   }
+
+  //   scrollParent.addEventListener("scroll", onScroll, { passive: true });
+  //   return () => {
+  //     scrollParent.removeEventListener("scroll", onScroll);
+  //     cancelAnimationFrame(rafRef.current);
+  //     clearTimeout(timerRef.current);
+  //   };
+  // }, []);
 
   return (
     <div

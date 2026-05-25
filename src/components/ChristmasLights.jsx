@@ -1,10 +1,17 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import { useState} from "react";
+ 
 
 const COLORS = ["#ff2200", "#ff6600", "#ff0044", "#cc0000", "#ff0044"];
 
 export function ChristmasLights({ active }) {
+  const [mounted, setMounted] = useState(false);  
   const bulbRefs = useRef([]);
   const timeoutRef = useRef(null);
+    useEffect(() => {
+    setMounted(true);  // 👈 DOM is ready now
+  }, []);
 
   useEffect(() => {
     function flicker() {
@@ -42,44 +49,46 @@ export function ChristmasLights({ active }) {
       clearTimeout(timeoutRef.current);
     };
   }, [active]);
+   if (!mounted || !active) return null; 
 
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: "4%",
-        left: "50%",
-        transform: "translateX(-50%)",
-        display: "flex",
-        alignItems: "center",
-        padding: "8px 16px",
-        zIndex: 9999,
-        justifyContent: "center",
-      }}
-    >
-      {Array.from({ length: 16 }).map((_, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center" }}>
-          <div
-            ref={(el) => (bulbRefs.current[i] = el)}
-            style={{
-              width: 14,
-              height: 14,
-              borderRadius: "50%",
-              background: "#333",
-              border: "1.5px solid #444",
-            }}
-          />
-          {i < 15 && (
-            <div
-              style={{
-                width: 20,
-                height: 1.5,
-                background: "#444",
-              }}
-            />
-          )}
-        </div>
-      ))}
+  return createPortal(
+   <div
+  style={{
+    position: "fixed",
+    top: "10%",
+    left: "50%",                    // ✅ true center
+    transform: "translateX(-50%)",  // ✅ offset by own width
+    display: "flex",
+    alignItems: "center",
+    padding: "8px 16px",
+    justifyContent: "center",
+    // ❌ removed overflow: hidden — was clipping the glow
+  }}
+>
+  {Array.from({ length: 16 }).map((_, i) => (
+    <div key={i} style={{ display: "flex", alignItems: "center" }}>
+      <div
+        ref={(el) => (bulbRefs.current[i] = el)}
+        style={{
+          width: 14,
+          height: 14,
+          borderRadius: "50%",
+          background: "#555",       // ✅ visible when off
+          border: "1.5px solid #888", // ✅ visible when off
+        }}
+      />
+      {i < 15 && (
+        <div
+          style={{
+            width: 20,
+            height: 1.5,
+            background: "#666",     // ✅ brighter wire
+          }}
+        />
+      )}
     </div>
+  ))}
+</div>,
+ document.body 
   );
 }

@@ -31,10 +31,16 @@ function App() {
   const sectionRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
+  const [isPinned, setIsPinned] = useState(false); // rename for clarity
 
 useEffect(() => {
-  if (location.pathname !== "/") {
-    setIsScrolling(false); // turn off flicker when on event page
+  if (location.pathname === "/") {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    ScrollTrigger.refresh();
+  } else {
+    setIsScrolling(false);
   }
 }, [location.pathname]);
 
@@ -55,102 +61,88 @@ useEffect(() => {
     }).set("#loader", { display: "none" });
   }, []);
 
-  useEffect(() => {
-    ScrollTrigger.refresh();
-  }, []);
-
+useEffect(() => {
+  if (location.pathname !== "/") {
+    setIsScrolling(false);
+    window.scrollTo(0, 0);
+  }
+}, [location.pathname]); 
 
 
   //Profile card 
 
   useEffect(() => {
+  if (location.pathname !== "/") return;
 
-  const mm = gsap.matchMedia();
+  const timeout = setTimeout(() => {
+    const mm = gsap.matchMedia();
 
-  // ================= DESKTOP =================
-  mm.add("(min-width: 1024px)", () => {
-
-    gsap.to(".cards", {
-      x: -2400,
-      ease: "none",
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "+=2000",
-        scrub: 1,
-        pin: true,
-        // markers:true,
-        onUpdate: () => setIsScrolling(true),
-      onScrubComplete: () => setIsScrolling(false),
-      },
-    });
-
-  });
-
-  // ================= MOBILE =================
-  mm.add("(max-width: 1023px)", () => {
-
-    const cards = gsap.utils.toArray(".card");
-
- gsap.set(cards, {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  xPercent: -50,
-  yPercent: -50,
-});
-
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top top",
-        end: () => `+=${cards.length * window.innerHeight * 2}`,
-        scrub: 0.5,
-        pin: true,
-        onUpdate: () => setIsScrolling(true),       // ✅ ADD THIS
-        onScrubComplete: () => setIsScrolling(false),
-
-
-      },
-    });
-
-    cards.forEach((card, index) => {
-
-      if (index === 0) return;
-
-      tl.fromTo(
-        card,
-        {
-          y: 300,
-          opacity: 0,
-          scale: 0.8,
+    mm.add("(min-width: 1024px)", () => {
+      gsap.to(".cards", {
+        x: -2400,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=2000",
+          scrub: 1,
+          pin: true,
+          onEnter: () => setIsPinned(true),
+          onLeave: () => setIsPinned(false),
+          onLeaveBack: () => setIsPinned(false),
+          onEnterBack: () => setIsPinned(true),
         },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 0.5,
-          ease: "power3.out",
-        }
-      );
-
+      });
     });
 
-  });
+    mm.add("(max-width: 1023px)", () => {
+      const cards = gsap.utils.toArray(".card");
+      gsap.set(cards, {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        xPercent: -50,
+        yPercent: -50,
+      });
 
-return () => {
-  mm.revert();
-  ScrollTrigger.killAll();
-  gsap.killTweensOf("*");
-  gsap.set(".cards", { clearProps: "all" });
-};
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: () => `+=${cards.length * window.innerHeight * 2}`,
+          scrub: 0.5,
+          pin: true,
+          onEnter: () => setIsPinned(true),
+          onLeave: () => setIsPinned(false),
+          onLeaveBack: () => setIsPinned(false),
+          onEnterBack: () => setIsPinned(true),
+        },
+      });
 
-}, []);
+      cards.forEach((card, index) => {
+        if (index === 0) return;
+        tl.fromTo(card,
+          { y: 300, opacity: 0, scale: 0.8 },
+          { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }
+        );
+      });
+    });
+
+    ScrollTrigger.refresh();
+  }, 100);
+
+  return () => {
+    clearTimeout(timeout);
+    setIsPinned(false); // 👈 force reset on cleanup
+    ScrollTrigger.killAll();
+    gsap.killTweensOf("*");
+    gsap.set(".cards", { clearProps: "all" });
+  };
+}, [location.pathname]);
 
 
   return (
-
+<>    <ChristmasLights active={isPinned} />
      <Routes>
     <Route
       path="/"
@@ -164,7 +156,7 @@ return () => {
           >
 
         
-            <ChristmasLights active={isScrolling} style={{ position: "fixed" }}/>
+            {/* <ChristmasLights active={isScrolling} style={{ position: "fixed" }}/> */}
 
             <div
               className="
@@ -179,16 +171,16 @@ return () => {
                 lg:pt-20
               "
             >
-              <ProfileCard id={1} name="Lucas" image={lucas} />
-              <ProfileCard id={2} name="Eleven" image={eleven} />
-              <ProfileCard id={3} name="Dustin" image={dustin} />
-              <ProfileCard id={4} name="Will" image={will} />
-              <ProfileCard id={5} name="Hopper" image={hopper} />
-              <ProfileCard id={6} name="Natalie" image={mike} />
-              <ProfileCard id={7} name="Natalie" image={Jhonathan} />
-              <ProfileCard id={8} name="Natalie" image={joyce} />
-              <ProfileCard id={9} name="Natalie" image={robin} />
-              <ProfileCard id={10} name="Natalie" image={nancy} />
+              <ProfileCard id={1} name="Lucas" image={lucas} isScrolling={isPinned} />
+              <ProfileCard id={2} name="Eleven" image={eleven} isScrolling={isPinned}/>
+              <ProfileCard id={3} name="Dustin" image={dustin} isScrolling={isPinned}/>
+              <ProfileCard id={4} name="Will" image={will} isScrolling={isPinned}/>
+              <ProfileCard id={5} name="Hopper" image={hopper} isScrolling={isPinned}/>
+              <ProfileCard id={6} name="Natalie" image={mike} isScrolling={isPinned}/>
+              <ProfileCard id={7} name="Natalie" image={Jhonathan} isScrolling={isPinned}/>
+              <ProfileCard id={8} name="Natalie" image={joyce} isScrolling={isPinned}/>
+              <ProfileCard id={9} name="Natalie" image={robin} isScrolling={isPinned}/>
+              <ProfileCard id={10} name="Natalie" image={nancy} isScrolling={isPinned}/>
             </div>
           </section>
 
@@ -199,6 +191,7 @@ return () => {
 
     <Route path="/event/:id" element={<EventPage />} />
   </Routes>
+  </>
   );
 };
 

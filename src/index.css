@@ -14,9 +14,9 @@ body {
 
   background: #000;
   color: white;
-
+  overflow-x: hidden;
   overscroll-behavior-y: none;
-  overflow-x: clip;
+  /* overflow-x: clip; */
 
   font-family: "Outfit", sans-serif;
 
