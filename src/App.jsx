@@ -109,8 +109,8 @@ useEffect(() => {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: () => `+=${cards.length * window.innerHeight * 2}`,
-          scrub: 0.5,
+          end: () => `+=${cards.length * window.innerHeight * 1.2}`,
+          scrub: 0.1,
           pin: true,
           onEnter: () => setIsPinned(true),
           onLeave: () => setIsPinned(false),

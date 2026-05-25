@@ -8,6 +8,7 @@ const COLORS = ["#ff2200", "#ff6600", "#ff0044", "#cc0000", "#ff0044"];
 export function ChristmasLights({ active }) {
   const [mounted, setMounted] = useState(false);  
   const bulbRefs = useRef([]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const timeoutRef = useRef(null);
     useEffect(() => {
     setMounted(true);  // 👈 DOM is ready now
@@ -55,7 +56,7 @@ export function ChristmasLights({ active }) {
    <div
   style={{
     position: "fixed",
-    top: "10%",
+    top: isMobile ? "7%" : "10%",
     left: "50%",                    // ✅ true center
     transform: "translateX(-50%)",  // ✅ offset by own width
     display: "flex",
